@@ -154,4 +154,65 @@ class ReporteController extends BaseController
             exit;
         }
       }
+
+    public function buscar()
+    {
+        $nombre = $this->request->getGet('nombre');
+
+        $sql = "
+            SELECT 
+                SH.id,
+                SH.superhero_name,
+                SH.full_name,
+                PB.publisher_name,
+                AL.alignment,
+                GROUP_CONCAT(SP.power_name SEPARATOR ', ') AS poderes
+            FROM superhero.superhero SH
+            LEFT JOIN superhero.publisher PB ON SH.publisher_id = PB.id
+            LEFT JOIN superhero.alignment AL ON SH.alignment_id = AL.id
+            LEFT JOIN superhero.hero_power HP ON SH.id = HP.hero_id
+            LEFT JOIN superhero.superpower SP ON HP.power_id = SP.id
+            WHERE (? IS NULL OR SH.superhero_name LIKE ?)
+            GROUP BY SH.id, SH.superhero_name, SH.full_name, PB.publisher_name, AL.alignment
+        ";
+
+        $like = $nombre ? "%$nombre%" : null;
+        $query = $this->db->query($sql, [$nombre, $like]);
+        $result = $query->getResultArray();
+
+        return view('reporte/filtroR5', ['heroes' => $result, 'nombre' => $nombre, 'estilos' => view('reporte/estilos')]);
+    }
+
+    public function getReporte5()
+    {
+        $id = $this->request->getPost('id'); 
+
+        // Traer poderes del héroe
+        $powers = $this->db->query("
+            SELECT sp.power_name 
+            FROM superpower sp
+            INNER JOIN hero_power hp ON sp.id = hp.power_id
+            WHERE hp.hero_id = ?", [$id]
+        )->getResultArray();
+
+        $hero = $this->db->query("SELECT superhero_name FROM superhero WHERE id = ?", [$id])->getRowArray();
+
+        // Renderizar solo la lista de poderes en la vista reporte5
+        $html = view('reporte/reporte5', [
+            'powers' => $powers,
+            'hero' => $hero,
+            'estilos' => view('reporte/estilos')
+        ]);
+
+        try {
+            $html2pdf = new Html2Pdf('P', 'A4', 'es');
+            $html2pdf->writeHTML($html);
+            $html2pdf->output('poderes_heroe_'.$id.'.pdf', 'I'); 
+            // "I" = abrir en el navegador
+            exit;
+        } catch (Html2PdfException $e) {
+            echo $e->getMessage();
+            exit;
+        }
+    }
 }
