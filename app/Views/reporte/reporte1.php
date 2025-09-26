@@ -8,6 +8,6 @@
 <body>
   <h1>Hola mundo</h1>
   <!--Img---> 
-  <img src="img/tusideas.png" alt="ideas" width="200">
+  <img src="/img/tusideas.png" alt="ideas" width="200">
 </body>
 </html>

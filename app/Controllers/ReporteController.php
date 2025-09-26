@@ -3,10 +3,15 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\Alignment;
+use App\Models\Race;
+use App\Models\Publisher;
+use CodeIgniter\Commands\Utilities\Publish;
 use Exception;
 use Spipu\Html2Pdf\Html2Pdf;
 use Spipu\Html2Pdf\Exception\Html2PdfException;
 use Spipu\Html2Pdf\Exception\ExceptionFormatter;
+use App\Models\Superhero;
 
 class ReporteController extends BaseController
 {
@@ -18,6 +23,81 @@ class ReporteController extends BaseController
     {
       $this->db = \Config\Database::connect();
     }
+
+    public function showUIreporte(){
+      $publicher = new Publisher();
+      $race = new Race();
+      $alignment = new Alignment();
+
+      $datos = [
+        "publishers"=> $publicher->findAll(),
+        "races"=> $race->findAll(),
+        "alignment"=> $alignment->findAll()
+      ];
+     
+      return view('reporte/rpt-ui', $datos);
+    }
+
+    public function getReportByPublisher(){
+    $superhero = new Superhero();
+    // Corregir la llamada al método para que coincida con el modelo
+    $publisher_id = intval($this->request->getVar('publisher_id')) ;
+
+    $datos = [
+      'estilos' => view('reporte/estilos'),
+      'superheros' => $superhero->getSuperheroesByPublisher(1)
+    ];
+
+    $html = view('reporte/rpt-superhero', $datos);
+
+     try {
+        $html2pdf = new Html2Pdf('P', 'A4', 'es', true, 'UTF-8', [20, 10, 10, 10]);
+        $html2pdf->writeHTML($html);
+        $this->response->setHeader('Content-Type', 'application/pdf');
+        $html2pdf->output('Reporte3.pdf');
+        // exit(); //Opcional
+          
+        } catch (Html2PdfException $e) {
+          $html2pdf->clean();
+          $formatter = new ExceptionFormatter($e);
+          echo $formatter->getMessage();
+        }
+}
+
+public function getReportByRaceAlignment(): void
+{
+    $superhero = new Superhero();
+    
+    // Obtiene los valores de los parámetros de la solicitud
+    $race_id = intval(value: $this->request->getVar(index: 'race_id'));
+    $alignment_id = intval(value: $this->request->getVar(index: 'alignment_id'));
+    
+    // Datos a enviar a la vista
+    $datos = [
+        'estilos' => view(name: 'reporte/estilos'),
+        'superheros' => $superhero->getSuperHeroByRaceAlignment(race_id: $race_id, alignment_id: $alignment_id)
+    ];
+    
+    // Genera el HTML para el reporte
+    $html = view(name: 'reportes/rpt-superhero-ra', data: $datos);
+
+    // Configuración y generación del PDF usando HTML2PDF
+     try {
+        $html2pdf = new Html2Pdf('P', 'A4', 'es', true, 'UTF-8', [20, 10, 10, 10]);
+        $html2pdf->writeHTML($html);
+        $this->response->setHeader('Content-Type', 'application/pdf');
+        $html2pdf->output('Reporte3.pdf');
+        // exit(); //Opcional
+          
+        } catch (Html2PdfException $e) {
+          $html2pdf->clean();
+          $formatter = new ExceptionFormatter($e);
+          echo $formatter->getMessage();
+        }
+}
+
+    
+
     public function getReporte1()
     {
         $html = view('reporte/reporte1');
