@@ -71,7 +71,7 @@
     btnDatos.addEventListener("click", async () => {
       try {
         aviso.classList.remove("d-none")
-        const response = await fetch('http://superhero.test/public/api/Informe2', {method: 'GET'});
+        const response = await fetch('http://reportes-superhero.test/public/api/Informe2', {method: 'GET'});
 
         if (!response.ok) {
           throw new Error('No se pudo lograr comunicación');

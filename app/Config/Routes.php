@@ -20,8 +20,17 @@ $routes->post('/reporte/racealignment','ReporteController::getReportByRaceAlignm
 $routes->get('/dashboard/informe01','DashboardController::getinforme01');
 $routes->get('/dashboard/informe2','DashboardController::getinforme02');
 $routes->get('/dashboard/informe3','DashboardController::getinforme03');
-$routes->get('/dashboard/informe4','DashboardController::getinforme04');
 
 $routes->get('/public/api/Informe2','DashboardController::getDataInforme2');
 $routes->get('/public/api/Informe3','DashboardController::getDataInforme3');
 $routes->get('/public/api/Informe3','DashboardController::getDataInforme3Cache');
+
+//Ruta de los informes
+$routes->get('/dashboard/genderReporte','DashboardController::getGenero');
+$routes->get('/dashboard/PublisherCount','DashboardController::getInformePublishers');
+$routes->get('/dashboard/avgWeight','DashboardController::getInformeAvgWeight');
+//Ruta de las APIs
+$routes->get('/public/api/publisherCounts', 'DashboardController::getDataPublishers');
+$routes->get('/public/api/avgWeightByPublisher','DashboardController::getDataAvgWeightByPublisher');
+//Ruta que genera el PDF
+$routes->get('/dashboard/pdf','DashboardController::VistaPdf');
